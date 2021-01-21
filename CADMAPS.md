@@ -1,6 +1,55 @@
-# CADMAPS Function Tokens
-Bash-like enclosing. CADMAPS operations/types are all capitalized. CADMAPS uses explicit variable types.
+# CADMAPS Definitions
+CADMAPS... 
+- uses Bash-like enclosing. 
+- operations/types are all capitalized.
+- uses explicit variable types.
+- aims to be fairly readable
 
+# Types
+### Integers
+| Name | C++ Representation | Notes |
+|--|--|--|
+| INTEGER | `int` | 0 to +/- 2,147,483,648 |
+| UINTEGER | `unsigned int` | 0 to 4,294,967,295 |
+| SHORT | `short int` | 0 to +/- 32,768 |
+| USHORT | `unsigned short int` | 0 to 65,535 |
+| LONG | `long long int` | 0 to +/- 9,223,372,036,854,775,808 |
+| ULONG | `unsigned long long int` | 0 to 18,446,744,073,709,551,615 |
+### Decimals
+| Name | C++ Representation | Notes |
+|--|--|--|
+| DECIMAL | `float` | 0 to +/- 16,777,216; 7 decimal places |
+| PRECISION | `long float` | 0 to +/- 9,007,199,254,740,992; 15 decimal places |
+### Characters
+| Name | C++ Representation | Notes |
+|--|--|--|
+| LETTER | `char` | A signed 8b integer |
+| BYTE | `unsigned char` | 0 to 255; 8b integer |
+| STRING | `char[]` | A list of LETTERS makes a STRING |
+### Lists
+| Name | C++ Representation | Notes |
+|--|--|--|
+| SET<`type`> | `std::vector<(type)>` | Mutable vector of `type` |
+| TSET<`type`> | `std::map<char[], (type)>` | Mutable map of `type` |
+| NESTSET<`type`> | `std::vector<std::vector<(type)>>` | Mutable vector of `type` vectors |
+| NESTTSET<`type`> | `std::vector<std::map<char[], (type)>>` | Mutable vector of `type` maps |
+### Other
+| Name | C++ Representation |
+|--|--|
+| TOGGLE | `bool` |
+| REFERENCE | `*` |
+| EMPTY | `void` |
+
+## Thread-safe Types
+### Integers
+| Name | C++ Representation |
+|--|--|
+| SAFEINTEGER | `std::atomic<int>` |
+| SAFEUINTEGER | `std::atomic<unsigned int>` |
+| SAFESHORT | `std::atomic<short int>` |
+| SAFEUSHORT | `std::atomic<unsigned short int>` |
+| SAFELONG | `std::atomic<long long int>` |
+| SAFEULONG | `std::atomic<unsigned long long int>` |
 
 ## Conditional Operation
 | Keywords | Info |
