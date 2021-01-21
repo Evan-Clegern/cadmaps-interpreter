@@ -1,0 +1,59 @@
+Bash-like enclosing
+Enclosed operations must be capitalized.
+
+
+** condition operations **
+WHEN {condition} DO [singular]
+WHEN {condition} KEEPDO [iterative]
+..ORWHEN {condition} DO / KEEPDO
+..WHENELSE DO [singular only - for KEEPDO's, is "cleanup"]
+- ENDWHEN
+
+WHEN i = 7 DO
+	print("i like seven!")
+ORWHEN i = -7 DO
+	print("i also like negative seven!")
+WHENELSE DO
+	print("me no like")
+ENDWHEN
+WHEN i = 1 KEEPDO
+	print("nerd")
+ORWHEN i = 2 KEEPDO
+	print("doctor")
+ORWHEN i = 3 KEEPDO
+	print("nevermind")
+WHENELSE DO
+	print("not cool")
+ENDWHEN
+
+
+** iterative loop **
+FROM set<> SELECT var KEEPDO
+FROM set<> SELECT var WITH index KEEPDO
+FROM set<> SELECT var IF {condition} KEEPDO
+FROM set<> SELECT var IF {condition} WITH index KEEPDO
+FROM RANGE(from, [to, [step]]) WITH index KEEPDO
+- ENDFROM
+
+FROM RANGE(0, 15) WITH i KEEPDO
+	print (i)
+ENDFROM
+
+
+** error **
+DURING {operation} TESTFOR error {operation}
+DURING {operation} CHECKFOR warning {operation}
+..ANDTESTFOR error
+..ANDCHECKFOR warning
+..AFTERWARDS {oper}
+- ENDDURING
+
+DURING
+	i = (i + 4) / (i - 1)
+TESTFOR divide_zero
+	print("i bad")
+ANDCHECKFOR precision_problem
+	print("i precision bad")
+AFTERWARDS
+	i = i * 4
+ENDDURING
