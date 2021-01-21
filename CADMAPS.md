@@ -3,7 +3,8 @@ CADMAPS...
 - uses Bash-like enclosing. 
 - operations/types are all capitalized.
 - uses explicit variable types.
-- aims to be fairly readable
+- has `#` as its comment character.
+- aims to be fairly readable.
 
 # Base Types
 ### Integers
@@ -21,7 +22,7 @@ Just accompany with `UNREAL`, like `UNREALINTEGER`
 | Name | C++ Representation | Notes |
 |--|--|--|
 | DECIMAL | `float` | 0 to +/- 16,777,216; 7 decimal places |
-| PRECISION | `long float` | 0 to +/- 9,007,199,254,740,992; 15 decimal places |
+| PRECISION | `long float` | 0 to +/- 9,007,199,254,740,992; 15 decimal places -> `double` |
 ### Characters
 | Name | C++ Representation | Notes |
 |--|--|--|
@@ -40,8 +41,9 @@ Just accompany with `UNREAL`, like `UNREALINTEGER`
 |--|--|
 | TOGGLE | `bool` |
 | REFERENCE | `*` |
+| NEW_REFERENCE | `&` |
 | EMPTY | `void` |
-
+| NULL | `NULL` |
 ## Threading Types
 ### Integers
 | Name | C++ Representation |
@@ -73,26 +75,79 @@ Just accompany with `UNREAL`, like `UNREALINTEGER`
 
 
 ## Errors
+General Class has `ERRORENUM what  STRING info  UINTEGER where`
+
 | Name | Info |
 |------|--|
-| imaginary | Some square root occurred of a negative w/o explicit `UNREAL` |
-| too_big | A value was passed that was larger than expected or handleable |
+| imaginary | Some square root occurred of a negative w/o explicit `UNREAL`. |
+| too_big | A value was passed that was larger than expected or handleable. |
+| too_small | A value was passed that was smaller than expected or handleable. |
+| math_overflow | Attempted to create a value too large to store (in type). |
+| type_mismatch | Types do not match up at all. |
+| failed_new | A `NEW` operation could not be completed. |
+| failed_remove | A `REMOVE` operation could not be completed. |
+| memory_unsafe | Backup prevention for a data race. |
+| memory_overflow | A value has overflown in memory. |
+| memory_too_full | Too much memory has been taken up. |
+| memory_nullref | `REFERENCE` to something expected, got `NULL`. |
+| memory_no_ref | `NEW_REFERENCE` not available for something. |
+| logic_failure | Unknown failure with logic/conditions. |
+| divide_zero | Attempted to divide by zero. |
+| range_error | Attempted to access item out-of-range in a `SET`. |
+| range_too_wide | Attempted to store item in max-size `SET`. |
+| uninitialized_err | Using something that has no default value, before it's assigned one. |
+| not_a_parameter | Attempted to access a param (i.e. enum item, bit) that doesn't exist. |
+| not_a_function | Attempted to access a `FUNCTION` that doesn't exist. |
+| no_matching_usage | An operation extension (i.e. "AS") has no matching operation. |
+| no_matching_end | An operation (like `FUNCTION`) has no matching `END***`. |
+| no_matching_close | An enclosed item has no matching close (like `(i > 3`). |
+| no_matching_give | A `FUNCITON` without `SOMEGIVE` does not GIVE a value. |
+| illegal_parameters | A `FUNCTION` is trying to take illegal parameter types. |
+| illegal_call | Tried to call a `FUNCTION` with impromer parameter types. |
+| c_exception | An unknown C++ Error occurred. |
+
+## Warnings
+General Class has `WARNINGENUM what  STRING info  UINTEGER where`
+
+| Name | Info |
+|--|--|
+| precision_problem | An operation had a drop of precision. |
+| is_zero | Function shouldn't be expected to operate on a zero. |
+| type_nocast | Types can match, but a cast wasn't declared. |
+| type_nodecimal | Types can match, but it's from a "decimal" to "integer." |
+| reference_issue | Tried using a declared `NEW_REFERENCE` w/o `REFERENCE`. |
+| custom | Enables users to make their own warning. |
 
 # Function Declaration
-FUNCTION `name` TAKING `list` DOES ..
+- FUNCTION `name` AS `type` DOES ..
+- FUNCTION `name` AS `type`, TAKING {`type paramname`,**`type paramname`,...**} DOES ..
+- FUNCTION `name` AS SOMEGIVE `type` DOES ..  *`SOMEGIVE` means that "branches" that don't `GIVE` specifically `GIVE NULL`.*
+- FUNCTION `name` AS SOMEGIVE `type`, TAKING {`type paramname`,**`type paramname`,...**} DOES ..
+
 | Command | Notes |
 |--|--|
 | GIVE `what` | Effectively a "successful" return for `what` |
 | GIVE `what` ANDWARN `warning` | Return `what` with a constructed warning |
-| RAISE `error` | Stop function and raise `error` from `ERRORS` |
-| WARN `warning` | Continue function but raise `warning` from `WARNINGS` |
-#### Example:
+| RAISE `error`*,`message`* | Stop function and raise `error` type. Can be accompanied with message. |
+| WARN `warning`*,`message`* | Continue function but raise `warning` type. Can be accompanied with message. |
+
+`RAISE` and `WARN` declarations automatically "generate" their error/warning with the
+line number the declaration is on, and the warning text (unless specified) is the default
+information about the error/warning.
+
+#### Examples:
 ```
-FUNCTION sqrt TAKING {int a} DOES
+FUNCTION haha AS STRING DOES
+	GIVE "haha"
+ENDFUNCTION
+```
+and
+```
+FUNCTION sqrt AS SOMEGIVE DECIMAL, TAKING {int a} DOES
 	WHEN a == 0 DO
-		GIVE 0 ANDWARN is_zero
+		GIVE 0 ANDWARN is_zero, "0 cannot be Square Rooted"
 	ORWHEN a < 0 DO
-		RAISE imaginary
+		RAISE imaginary #the SOMEGIVE path; raises error instead of GIVE. GIVEs NULL if error handled.
 	WHENELSE DO
 		GIVE (sqrt(a))
 	ENDWHEN
@@ -100,6 +155,14 @@ ENDFUNCTION
 ```
 
 # Class Overviews
+## General Operations
+| Name | Does... |
+|--|--|
+| NEW `class`(`parameters`) | Creates a new `class`, passing `parameters` to constructors. |
+| REMOVE `item` | Deletes the item in question from memory. |
+| COPY `item` `newitem` | Copies values in `item` to new variables as `newitem` |
+| SWAP `item1` `item2` | Swaps the class values of `item1` and `item2` |
+
 ### Managed Byte - `FULLBYTE`
 Provides functionality to manipulate a single `BYTE` on a binary level, along with extra functions.
 | Method | Types |Function |
@@ -157,7 +220,7 @@ ENDWHEN
 ```
 
 ## Iterative Operation
-FROM `set<type>` SELECT `var` KEEPDO .. *with `var` being `USHORT`*
+FROM `SET<type>` SELECT `var` KEEPDO .. *with `var` being `<type>`*
 
 | Extension | Notes |
 |--|--|
@@ -187,18 +250,22 @@ ENDFROM
 ```
 
 ## Error Handling
+
 DURING ..
 
 | Handling Statement | Notes |
 |--|--|
-| TESTFOR `type` .. | explicit exceptions matching `type`; declarative |
-| CHECKFOR `type` .. | warnings matching `type`; declarative |
-| ANDTESTFOR `type` .. | explicit exceptions matching `type`; fork |
-| ANDCHECKFOR `type` .. | warnings matching `type`; fork |
-| ANDTESTELSE `var` .. | store unhandeld exceptions into new `var`; finalizing |
-| ANDCHECKELSE `var` .. | store unchecked warnings into new `var`; finalizing |
+| TESTFOR `type` .. | error matching `type`; declarative |
+| CHECKFOR `type` .. | warning matching `type`; declarative |
+| ANDTESTFOR `type` .. | error matching `type`; fork |
+| ANDCHECKFOR `type` .. | warning matching `type`; fork |
+| ANDTESTFOR `type` AS `var` INSTACK .. | store all errors matching `type` in new `SET<ERROR> var`; fork |
+| ANDCHECKFOR `type` AS `var` INSTACK .. | store all warnings matching `type` in new `SET<WARNING> var`; fork |
+| ANDTESTELSE `var` .. | store unhandeld errors into new `SET<ERROR> var`; finalizing |
+| ANDCHECKELSE `var` .. | store unchecked warnings into new `SET<WARNING> var`; finalizing |
 | AFTERWARDS .. | action to do if a test or check occurred; finalizing |
 | ENDDURING | error handling close |
+
 #### Example:
 ```
 DURING
