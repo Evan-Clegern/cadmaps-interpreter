@@ -1,2 +1,2 @@
 # cadmaps-interpreter
-Cross-Abstraction Data Manipulation And Processing System. Plans, usage documentation and the sort is over in the [Wiki](https://github.com/Evan-Clegern/cadmaps-interpreter/wiki).
+Cross-Abstraction Data Manipulation And Processing System. An interpreted scripting language for manipulating, processing and what-have-its with data, across different abstraction levels, as well as for combining the features of C++, SQL and Python (eventually). Plans, usage documentation and the sort is over in the [Wiki](https://github.com/Evan-Clegern/cadmaps-interpreter/wiki).
